@@ -2,12 +2,74 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { getPostBySlug } from "@/lib/api";
 import { Button } from "@/components/Button";
+import GalleryBlock from "@/components/GalleryBlock";
 
 // Ensure page is evaluated dynamically since it reads cookies at request time
 export const dynamic = "force-dynamic";
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
+}
+
+interface EditorJsBlock {
+  id?: string;
+  type: string;
+  data: any;
+}
+
+interface EditorJsData {
+  time?: number;
+  blocks: EditorJsBlock[];
+  version?: string;
+}
+
+// SOLID-compliant block renderer
+function renderBlock(block: EditorJsBlock) {
+  switch (block.type) {
+    case "paragraph":
+      return (
+        <p
+          key={block.id}
+          className="text-neutral-300 text-base md:text-lg leading-relaxed mb-6 font-light"
+          dangerouslySetInnerHTML={{ __html: block.data.text }}
+        />
+      );
+    case "header": {
+      const level = block.data.level || 2;
+      const Tag = `h${level}` as "h2" | "h3" | "h4" | "h5" | "h6";
+      const classes: Record<number, string> = {
+        2: "text-2xl md:text-3xl font-extrabold text-neutral-100 tracking-tight mt-10 mb-4 first:mt-0",
+        3: "text-xl md:text-2xl font-bold text-neutral-200 tracking-tight mt-8 mb-3",
+        4: "text-lg md:text-xl font-semibold text-neutral-350 tracking-tight mt-6 mb-2",
+      };
+      return (
+        <Tag
+          key={block.id}
+          className={classes[level] || classes[2]}
+          dangerouslySetInnerHTML={{ __html: block.data.text }}
+        />
+      );
+    }
+    case "list": {
+      const isOrdered = block.data.style === "ordered";
+      const Tag = isOrdered ? "ol" : "ul";
+      const listClass = isOrdered
+        ? "list-decimal pl-6 space-y-2 mb-6 text-neutral-300"
+        : "list-disc pl-6 space-y-2 mb-6 text-neutral-300";
+      return (
+        <Tag key={block.id} className={listClass}>
+          {block.data.items.map((item: string, idx: number) => (
+            <li key={idx} dangerouslySetInnerHTML={{ __html: item }} />
+          ))}
+        </Tag>
+      );
+    }
+    case "gallery":
+      return <GalleryBlock key={block.id} urls={block.data.urls} />;
+    default:
+      console.warn(`Unknown block type: ${block.type}`);
+      return null;
+  }
 }
 
 export default async function PostPage({ params }: PostPageProps) {
@@ -76,6 +138,28 @@ export default async function PostPage({ params }: PostPageProps) {
       })
     : "Nieznana data";
 
+  // Parse block-editor content or fallback to raw text (for backwards compatibility)
+  let parsedContent: React.ReactNode;
+  try {
+    const rawJson = JSON.parse(post.content) as EditorJsData;
+    if (rawJson && Array.isArray(rawJson.blocks)) {
+      parsedContent = (
+        <div className="space-y-4">
+          {rawJson.blocks.map((block) => renderBlock(block))}
+        </div>
+      );
+    } else {
+      throw new Error("Invalid structure");
+    }
+  } catch {
+    // If not JSON, render as plain text paragraphs
+    parsedContent = (
+      <div className="whitespace-pre-line text-neutral-300 text-base leading-relaxed sm:text-lg">
+        {post.content}
+      </div>
+    );
+  }
+
   return (
     <article className="mx-auto max-w-3xl space-y-8">
       {/* Back Button */}
@@ -139,9 +223,9 @@ export default async function PostPage({ params }: PostPageProps) {
       {/* Divider */}
       <hr className="border-border" />
 
-      {/* Post Content */}
-      <div className="whitespace-pre-line text-neutral-300 text-base leading-relaxed sm:text-lg space-y-6">
-        {post.content}
+      {/* Dynamic Content Rendering */}
+      <div className="prose prose-invert max-w-none">
+        {parsedContent}
       </div>
     </article>
   );

@@ -2,8 +2,18 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/Button";
 import { createPost } from "@/lib/api";
+
+const BlockEditor = dynamic(() => import("@/components/BlockEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[350px] w-full bg-card rounded-lg border border-border animate-pulse flex items-center justify-center text-xs text-muted-foreground">
+      Ładowanie edytora blokowego...
+    </div>
+  ),
+});
 
 interface AdminFormProps {
   token: string;
@@ -181,17 +191,13 @@ export default function AdminForm({ token }: AdminFormProps) {
 
         {/* Content */}
         <div className="space-y-1.5">
-          <label htmlFor="content" className="text-sm font-semibold text-neutral-300">
-            Treść posta
+          <label className="text-sm font-semibold text-neutral-300">
+            Treść posta (Edytor blokowy)
           </label>
-          <textarea
-            id="content"
-            rows={12}
-            placeholder="Napisz coś interesującego..."
+          <BlockEditor
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(val) => setContent(val)}
             disabled={isLoading}
-            className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder-neutral-500 focus:border-neutral-600 focus:outline-none focus:ring-1 focus:ring-neutral-600 transition-colors disabled:opacity-50 font-sans"
           />
         </div>
 

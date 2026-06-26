@@ -46,3 +46,106 @@ body {
   background-color: var(--accent);
   color: #ffffff;
 }
+
+/* Editor.js Dark Mode Overrides */
+.codex-editor {
+  color: var(--foreground);
+}
+
+.ce-block--selected .ce-block__content {
+  background-color: var(--border) !important;
+}
+
+.ce-popover {
+  background-color: var(--card) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+.ce-popover__item-icon {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.ce-popover__item:hover {
+  background-color: var(--border) !important;
+}
+
+.ce-popover__item-title {
+  color: var(--foreground) !important;
+}
+
+.ce-popover__item--active {
+  background-color: var(--border) !important;
+}
+
+.ce-toolbar__plus,
+.ce-toolbar__settings-btn {
+  background-color: var(--card) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 6px !important;
+}
+
+.ce-toolbar__plus:hover,
+.ce-toolbar__settings-btn:hover {
+  background-color: var(--border) !important;
+}
+
+.cdx-input {
+  background-color: var(--background) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--foreground) !important;
+  border-radius: 8px !important;
+}
+
+.cdx-settings-button {
+  color: var(--foreground) !important;
+}
+
+.cdx-settings-button--active {
+  color: var(--accent) !important;
+}
+
+.ce-inline-toolbar {
+  background-color: var(--card) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.ce-inline-toolbar__button {
+  color: var(--foreground) !important;
+}
+
+.ce-inline-toolbar__button:hover {
+  background-color: var(--border) !important;
+}
+
+.ce-conversion-toolbar {
+  background-color: var(--card) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.ce-conversion-tool:hover {
+  background-color: var(--border) !important;
+}
+
+.ce-block__content,
+.ce-toolbar__content {
+  max-width: 100% !important;
+}
+
+/* Fix for nested lists / editorjs typography */
+.cdx-list {
+  padding-left: 1.5rem !important;
+  list-style-type: decimal !important;
+}
+
+.cdx-list--unordered {
+  list-style-type: disc !important;
+}
+
+.cdx-list__item {
+  padding: 0.25rem 0 !important;
+}
+
