@@ -6,6 +6,50 @@ import { Button } from "@/components/Button";
 // Set page as dynamic since it reads cookies at request time
 export const dynamic = "force-dynamic";
 
+// Helper function to extract a clean text preview from Editor.js JSON or plain text content
+function getPostExcerpt(content: string, maxLength = 100): string {
+  try {
+    const parsed = JSON.parse(content);
+    if (parsed && Array.isArray(parsed.blocks)) {
+      // Find the first paragraph block
+      const firstParagraph = parsed.blocks.find((b: any) => b.type === "paragraph");
+      
+      if (firstParagraph && firstParagraph.data && typeof firstParagraph.data.text === "string") {
+        // Remove HTML tags (like <b>, <i>, etc.) from Editor.js text block
+        const cleanText = firstParagraph.data.text.replace(/<[^>]*>/g, "");
+        return cleanText.length > maxLength 
+          ? cleanText.slice(0, maxLength).trim() + "..." 
+          : cleanText;
+      }
+      
+      // Fallback: search for any block with text content (like a header or list)
+      for (const block of parsed.blocks) {
+        if (block.data && typeof block.data.text === "string") {
+          const cleanText = block.data.text.replace(/<[^>]*>/g, "");
+          if (cleanText) {
+            return cleanText.length > maxLength 
+              ? cleanText.slice(0, maxLength).trim() + "..." 
+              : cleanText;
+          }
+        }
+      }
+
+      // Fallback if there are only image/gallery blocks
+      const hasGallery = parsed.blocks.some((b: any) => b.type === "gallery");
+      const hasImage = parsed.blocks.some((b: any) => b.type === "image");
+      if (hasGallery) return "[Galeria zdjęć]";
+      if (hasImage) return "[Zdjęcie]";
+    }
+  } catch {
+    // Fallback: it's not JSON, so it's legacy text. Clean HTML tags just in case and truncate
+    const cleanText = content.replace(/<[^>]*>/g, "");
+    return cleanText.length > maxLength 
+      ? cleanText.slice(0, maxLength).trim() + "..." 
+      : cleanText;
+  }
+  return "";
+}
+
 export default async function Home() {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
@@ -81,11 +125,8 @@ export default async function Home() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {posts.map((post) => {
-              // Create short excerpt if content is long
-              const excerpt =
-                post.content.length > 100
-                  ? post.content.slice(0, 100).trim() + "..."
-                  : post.content;
+              // Get clean user-friendly excerpt
+              const excerpt = getPostExcerpt(post.content);
 
               // Format date (simplified layout since we display in PL)
               const formattedDate = post.createdAt
