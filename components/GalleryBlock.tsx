@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface GalleryBlockProps {
   urls: string[];
@@ -22,6 +22,26 @@ export default function GalleryBlock({ urls }: GalleryBlockProps) {
     if (activeImageIndex === null) return;
     setActiveImageIndex((prev) => (prev !== null && prev < urls.length - 1 ? prev + 1 : 0));
   };
+
+  // Keyboard navigation for Lightbox (Arrow keys to slide, Escape to close)
+  useEffect(() => {
+    if (activeImageIndex === null) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setActiveImageIndex(null);
+      } else if (e.key === "ArrowLeft") {
+        setActiveImageIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : urls.length - 1));
+      } else if (e.key === "ArrowRight") {
+        setActiveImageIndex((prev) => (prev !== null && prev < urls.length - 1 ? prev + 1 : 0));
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [activeImageIndex, urls]);
 
   // Determine grid layout based on number of images
   const getGridLayout = () => {
