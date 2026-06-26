@@ -1,46 +1,28 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { getAllPosts, PostDto } from "@/lib/api";
 import { Button } from "@/components/Button";
 
-interface Post {
-  id: string;
-  title: string;
-  excerpt: string;
-  date: string;
-  readTime: string;
-  category: string;
-}
+// Set page as dynamic since it reads cookies at request time
+export const dynamic = "force-dynamic";
 
-const mockPosts: Post[] = [
-  {
-    id: "wstep-do-ktor",
-    title: "Wstęp do Ktor i Kotlin - budowa nowoczesnego backendu API",
-    excerpt:
-      "Jak zacząć pracę z frameworkiem Ktor w języku Kotlin? W tym artykule stworzymy proste REST API, które docelowo połączymy z naszym frontendem Next.js.",
-    date: "25 czerwca 2026",
-    readTime: "5 min czytania",
-    category: "Backend",
-  },
-  {
-    id: "tailwind-v4-rewolucja",
-    title: "Dlaczego Tailwind CSS v4 to rewolucja w stylowaniu",
-    excerpt:
-      "Przegląd najważniejszych nowości w Tailwind CSS v4. Nowy kompilator, rezygnacja z pliku konfiguracyjnego JavaScript na rzecz natywnego CSS i niesamowita wydajność.",
-    date: "12 czerwca 2026",
-    readTime: "4 min czytania",
-    category: "CSS",
-  },
-  {
-    id: "nextjs-app-router-best-practices",
-    title: "Next.js App Router - najlepsze praktyki w 2026 roku",
-    excerpt:
-      "Podsumowanie wzorców projektowych przy użyciu App Routera w Next.js. Server Components, optymalizacja renderowania, obsługa stanów ładowania i SEO.",
-    date: "1 czerwca 2026",
-    readTime: "8 min czytania",
-    category: "Next.js",
-  },
-];
+export default async function Home() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
-export default function Home() {
+  let posts: PostDto[] = [];
+  let errorMsg = "";
+
+  try {
+    posts = await getAllPosts(token);
+  } catch (err) {
+    console.error("Failed to fetch posts:", err);
+    errorMsg = err instanceof Error ? err.message : "Nie udało się nawiązać połączenia z serwerem Ktor.";
+  }
+
+  // Placeholder cover image URL if post has none
+  const defaultCoverUrl = "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&auto=format&fit=crop&q=80";
+
   return (
     <div className="space-y-12">
       {/* Hero Section */}
@@ -53,9 +35,15 @@ export default function Home() {
           oraz architekturze oprogramowania. Czyste podejście do kodu i projektowania.
         </p>
         <div className="flex gap-3 pt-2">
-          <Link href="/login">
-            <Button variant="primary">Zaloguj się do panelu</Button>
-          </Link>
+          {token ? (
+            <Link href="/posts/new">
+              <Button variant="primary">Stwórz nowy wpis</Button>
+            </Link>
+          ) : (
+            <Link href="/login">
+              <Button variant="primary">Zaloguj się do panelu</Button>
+            </Link>
+          )}
           <Button variant="outline">O mnie</Button>
         </div>
       </section>
@@ -66,52 +54,115 @@ export default function Home() {
       {/* Recent Posts Section */}
       <section className="space-y-8">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold tracking-tight">Ostatnie artykuły</h2>
-          <span className="text-sm text-muted-foreground">Wszystkie wpisy ({mockPosts.length})</span>
+          <h2 className="text-2xl font-bold tracking-tight">Artykuły</h2>
+          <span className="text-sm text-muted-foreground">
+            {errorMsg ? "Błąd połączenia" : `Wszystkie wpisy (${posts.length})`}
+          </span>
         </div>
 
-        <div className="grid gap-6">
-          {mockPosts.map((post) => (
-            <article
-              key={post.id}
-              className="group relative flex flex-col items-start p-6 rounded-2xl border border-border bg-card hover:bg-neutral-900/50 hover:border-neutral-800 transition-all duration-300 shadow-sm"
-            >
-              <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-                <span className="px-2.5 py-0.5 rounded-full bg-neutral-800 text-neutral-300 font-medium">
-                  {post.category}
-                </span>
-                <span>•</span>
-                <time dateTime="2026-06-25">{post.date}</time>
-                <span>•</span>
-                <span>{post.readTime}</span>
-              </div>
-              <h3 className="text-xl font-bold tracking-tight group-hover:text-accent transition-colors mb-2">
-                <Link href={`#`}>
-                  <span className="absolute -inset-y-0 -inset-x-0 z-20 rounded-2xl" />
-                  {post.title}
-                </Link>
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                {post.excerpt}
-              </p>
-              <span className="text-xs font-semibold text-accent group-hover:underline flex items-center gap-1">
-                Czytaj dalej 
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  className="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform"
+        {errorMsg ? (
+          <div className="rounded-2xl border border-amber-900/50 bg-amber-950/20 p-8 text-center">
+            <h3 className="text-lg font-semibold text-amber-500 mb-2">Brak połączenia z backendem Ktor</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Upewnij się, że lokalny serwer backendowy Ktor działa pod adresem{" "}
+              <code className="bg-neutral-900 px-1.5 py-0.5 rounded text-neutral-300 font-mono text-xs">
+                http://localhost:8080
+              </code>
+              .
+            </p>
+            <div className="text-xs text-muted-foreground bg-neutral-950 p-4 rounded-lg max-w-lg mx-auto overflow-auto font-mono text-left border border-border">
+              Szczegóły błędu: {errorMsg}
+            </div>
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="rounded-2xl border border-border bg-card p-12 text-center">
+            <p className="text-muted-foreground text-sm">Nie opublikowano jeszcze żadnych artykułów.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {posts.map((post) => {
+              // Create short excerpt if content is long
+              const excerpt =
+                post.content.length > 100
+                  ? post.content.slice(0, 100).trim() + "..."
+                  : post.content;
+
+              // Format date (simplified layout since we display in PL)
+              const formattedDate = post.createdAt
+                ? new Date(post.createdAt).toLocaleDateString("pl-PL", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })
+                : "Nieznana data";
+
+              return (
+                <article
+                  key={post.id}
+                  className="group flex flex-col h-full rounded-2xl border border-border bg-card overflow-hidden hover:bg-neutral-900/40 hover:border-neutral-800 hover:-translate-y-0.5 transition-all duration-300 shadow-sm"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M3 10a.75.75 0 0 1 .75-.75h10.63l-3.01-3.01a.75.75 0 1 1 1.06-1.06l4.28 4.28a.75.75 0 0 1 0 1.06l-4.28 4.28a.75.75 0 1 1-1.06-1.06l3.01-3.01H3.75A.75.75 0 0 1 3 10Z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </span>
-            </article>
-          ))}
-        </div>
+                  <Link href={`/posts/${post.slug}`} className="flex flex-col h-full">
+                    {/* Cover Image Container */}
+                    <div className="relative aspect-video w-full overflow-hidden bg-neutral-900">
+                      <img
+                        src={post.coverImageUrl || defaultCoverUrl}
+                        alt={`Okładka artykułu: ${post.title}`}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                      
+                      {post.isPrivate && (
+                        <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full bg-neutral-950/85 backdrop-blur-sm border border-neutral-800 text-[10px] font-bold text-accent tracking-wider uppercase">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className="w-3 h-3 text-accent"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          Prywatny
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content Area */}
+                    <div className="flex flex-col flex-1 p-5 space-y-3">
+                      <time className="text-xs text-muted-foreground block">
+                        {formattedDate}
+                      </time>
+                      <h3 className="text-lg font-bold tracking-tight group-hover:text-accent transition-colors line-clamp-2 leading-snug">
+                        {post.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 flex-grow">
+                        {excerpt}
+                      </p>
+                      <span className="text-xs font-semibold text-accent group-hover:underline inline-flex items-center gap-1 pt-2 mt-auto">
+                        Czytaj artykuł 
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          className="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M3 10a.75.75 0 0 1 .75-.75h10.63l-3.01-3.01a.75.75 0 1 1 1.06-1.06l4.28 4.28a.75.75 0 0 1 0 1.06l-4.28 4.28a.75.75 0 1 1-1.06-1.06l3.01-3.01H3.75A.75.75 0 0 1 3 10Z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </span>
+                    </div>
+                  </Link>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </section>
     </div>
   );
