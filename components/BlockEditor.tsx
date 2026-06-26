@@ -94,9 +94,14 @@ export default function BlockEditor({ value, onChange, disabled = false }: Block
     if (!editorRef.current) return;
 
     const updateEditor = async () => {
-      await editorRef.current?.isReady;
-      if (!value) {
-        editorRef.current?.clear();
+      try {
+        await editorRef.current?.isReady;
+        if (!value && typeof editorRef.current?.blocks?.clear === "function") {
+          await editorRef.current.blocks.clear();
+        }
+      } catch (e) {
+        // Suppress or log warning instead of throwing unhandled exception
+        console.warn("Editor.js was not fully ready or blocks.clear is unavailable:", e);
       }
     };
     

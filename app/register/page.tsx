@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/Button";
-import { register } from "@/lib/api";
+import { register, ApiError } from "@/lib/api";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -36,18 +36,23 @@ export default function RegisterPage() {
         router.push("/login");
       }, 2000);
     } catch (err) {
-      console.error("Registration error:", err);
+      // Przechwytujemy błędy rejestracji i mapujemy na czytelne komunikaty dla użytkownika
       if (err instanceof Error) {
-        // Map common conflict/existing user error messages
         const msg = err.message.toLowerCase();
-        if (
+        if (err instanceof ApiError && err.status === 403) {
+          setError("Rejestracja nowych użytkowników jest wyłączona na tym serwerze. Tylko administratorzy mogą tworzyć konta.");
+        } else if (err instanceof ApiError && err.status === 409) {
+          setError("Użytkownik o tym adresie e-mail już istnieje.");
+        } else if (
           msg.includes("409") || 
           msg.includes("conflict") || 
           msg.includes("exists") || 
           msg.includes("istnieje") ||
           msg.includes("already registered")
         ) {
-          setError("Użytkownik o tym mailu istnieje.");
+          setError("Użytkownik o tym adresie e-mail już istnieje.");
+        } else if (msg.includes("403") || msg.includes("forbidden") || msg.includes("only administrators")) {
+          setError("Rejestracja nowych użytkowników jest wyłączona na tym serwerze. Tylko administratorzy mogą tworzyć konta.");
         } else {
           setError(err.message);
         }
