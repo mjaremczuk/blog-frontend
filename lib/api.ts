@@ -92,6 +92,32 @@ export async function login(credentials: LoginRequest): Promise<string> {
 }
 
 /**
+ * Rejestruje nowego użytkownika w systemie Ktor backend.
+ * @param credentials Dane rejestracji (email, password)
+ */
+export async function register(credentials: LoginRequest): Promise<void> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(credentials),
+    });
+
+    if (!res.ok) {
+      await handleResponseError(res);
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Wystąpił nieoczekiwany błąd podczas rejestracji.");
+  }
+}
+
+
+/**
  * Pobiera listę wszystkich artykułów z Ktor backend.
  * Obsługuje opcjonalny nagłówek autoryzacji w celu pobrania również prywatnych wpisów.
  * @param token Opcjonalny token JWT

@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/Button";
-import { login } from "@/lib/api";
+import { register } from "@/lib/api";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,26 +27,32 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // API call saves token to cookies automatically via setTokenCookie
-      await login({ email, password });
+      await register({ email, password });
       setSuccess(true);
-      
-      // Briefly show success before redirecting to admin panel
+      setEmail("");
+      setPassword("");
+      // Redirect to login page after a brief delay
       setTimeout(() => {
-        router.push("/admin");
-      }, 1000);
+        router.push("/login");
+      }, 2000);
     } catch (err) {
-      console.error("Login error:", err);
+      console.error("Registration error:", err);
       if (err instanceof Error) {
-        // Map common errors like 401 Unauthorized
+        // Map common conflict/existing user error messages
         const msg = err.message.toLowerCase();
-        if (msg.includes("401") || msg.includes("unauthorized") || msg.includes("credentials") || msg.includes("dane logowania")) {
-          setError("Nieprawidłowy adres e-mail lub hasło.");
+        if (
+          msg.includes("409") || 
+          msg.includes("conflict") || 
+          msg.includes("exists") || 
+          msg.includes("istnieje") ||
+          msg.includes("already registered")
+        ) {
+          setError("Użytkownik o tym mailu istnieje.");
         } else {
           setError(err.message);
         }
       } else {
-        setError("Wystąpił nieoczekiwany błąd podczas logowania.");
+        setError("Wystąpił nieoczekiwany błąd podczas rejestracji.");
       }
     } finally {
       setIsLoading(false);
@@ -57,9 +63,9 @@ export default function LoginPage() {
     <div className="flex min-h-[60vh] flex-col items-center justify-center">
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-lg">
         <div className="flex flex-col space-y-2 text-center mb-6">
-          <h1 className="text-2xl font-semibold tracking-tight">Panel Logowania</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Utwórz konto</h1>
           <p className="text-sm text-muted-foreground">
-            Zaloguj się do swojego konta, aby zarządzać wpisami.
+            Zarejestruj się, aby uzyskać dostęp do panelu administratorskiego.
           </p>
         </div>
 
@@ -71,7 +77,7 @@ export default function LoginPage() {
 
         {success && (
           <div className="mb-4 rounded-lg bg-emerald-950/50 border border-emerald-900 p-3 text-sm text-emerald-200">
-            Zalogowano pomyślnie! Przekierowywanie do panelu...
+            Rejestracja zakończona sukcesem! Przekierowanie do logowania...
           </div>
         )}
 
@@ -95,17 +101,12 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="password"
-                className="text-xs font-semibold text-neutral-300 uppercase tracking-wider"
-              >
-                Hasło
-              </label>
-              <a href="#" className="text-xs text-accent hover:underline">
-                Zapomniałeś hasła?
-              </a>
-            </div>
+            <label
+              htmlFor="password"
+              className="text-xs font-semibold text-neutral-300 uppercase tracking-wider"
+            >
+              Hasło
+            </label>
             <input
               id="password"
               type="password"
@@ -123,14 +124,14 @@ export default function LoginPage() {
             className="w-full mt-2"
             disabled={isLoading || success}
           >
-            {isLoading ? "Logowanie..." : "Zaloguj się"}
+            {isLoading ? "Rejestracja..." : "Zarejestruj się"}
           </Button>
         </form>
 
         <div className="mt-6 text-center text-sm text-muted-foreground">
-          Nie masz jeszcze konta?{" "}
-          <Link href="/register" className="font-medium text-accent hover:underline">
-            Zarejestruj się
+          Masz już konto?{" "}
+          <Link href="/login" className="font-medium text-accent hover:underline">
+            Zaloguj się
           </Link>
         </div>
       </div>
