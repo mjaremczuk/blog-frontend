@@ -36,7 +36,7 @@ export default async function Home() {
         </p>
         <div className="flex gap-3 pt-2">
           {token ? (
-            <Link href="/posts/new">
+            <Link href="/admin">
               <Button variant="primary">Stwórz nowy wpis</Button>
             </Link>
           ) : (
