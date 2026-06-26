@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/Button";
-import { createPost } from "@/lib/api";
+import { createPost, API_BASE_URL } from "@/lib/api";
 
 const BlockEditor = dynamic(() => import("@/components/BlockEditor"), {
   ssr: false,
@@ -82,7 +82,7 @@ export default function AdminForm({ token }: AdminFormProps) {
     formData.append("image", file);
 
     try {
-      const res = await fetch("http://localhost:8080/api/upload", {
+      const res = await fetch(`${API_BASE_URL}/api/upload`, {
         method: "POST",
         body: formData,
       });

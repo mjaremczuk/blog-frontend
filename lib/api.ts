@@ -27,7 +27,7 @@ export interface PostDto {
   createdAt: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://blog-backend-hwz2crveta-ew.a.run.app";
 
 // Helper function to set JWT token in cookies (client-side)
 function setTokenCookie(token: string, days = 7) {

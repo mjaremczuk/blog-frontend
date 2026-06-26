@@ -1,4 +1,5 @@
 import { API, BlockTool, BlockToolConstructorOptions } from "@editorjs/editorjs";
+import { API_BASE_URL } from "@/lib/api";
 
 interface GalleryToolData {
   urls: string[];
@@ -183,7 +184,7 @@ export class GalleryBlockTool implements BlockTool {
       formData.append("image", file);
 
       try {
-        const res = await fetch("http://localhost:8080/api/upload", {
+        const res = await fetch(`${API_BASE_URL}/api/upload`, {
           method: "POST",
           body: formData,
         });

@@ -6,6 +6,7 @@ import Header from "@editorjs/header";
 import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
 import { GalleryBlockTool } from "@/components/GalleryBlockTool";
+import { API_BASE_URL } from "@/lib/api";
 
 interface BlockEditorProps {
   value: string; // JSON string representing Editor.js output
@@ -56,7 +57,7 @@ export default function BlockEditor({ value, onChange, disabled = false }: Block
           class: ImageTool as any,
           config: {
             endpoints: {
-              byFile: "http://localhost:8080/api/upload", // Ktor backend upload endpoint
+              byFile: `${API_BASE_URL}/api/upload`, // Ktor backend upload endpoint
             },
             field: "image", // Name of the multipart field (Ktor receives this under 'image')
           }

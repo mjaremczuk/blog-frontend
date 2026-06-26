@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { getAllPosts, PostDto } from "@/lib/api";
+import { getAllPosts, PostDto, API_BASE_URL } from "@/lib/api";
 import { Button } from "@/components/Button";
 
 // Set page as dynamic since it reads cookies at request time
@@ -108,9 +108,9 @@ export default async function Home() {
           <div className="rounded-2xl border border-amber-900/50 bg-amber-950/20 p-8 text-center">
             <h3 className="text-lg font-semibold text-amber-500 mb-2">Brak połączenia z backendem Ktor</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Upewnij się, że lokalny serwer backendowy Ktor działa pod adresem{" "}
+              Upewnij się, że serwer backendowy Ktor działa pod adresem{" "}
               <code className="bg-neutral-900 px-1.5 py-0.5 rounded text-neutral-300 font-mono text-xs">
-                http://localhost:8080
+                {API_BASE_URL}
               </code>
               .
             </p>
