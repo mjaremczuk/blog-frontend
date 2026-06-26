@@ -64,6 +64,27 @@ function renderBlock(block: EditorJsBlock) {
         </Tag>
       );
     }
+    case "image": {
+      const url = block.data.file?.url || "";
+      const caption = block.data.caption || "";
+      if (!url) return null;
+      return (
+        <figure key={block.id} className="my-8 flex flex-col items-center">
+          <div className="relative overflow-hidden rounded-2xl border border-border bg-neutral-900 shadow-md max-w-full">
+            <img
+              src={url}
+              alt={caption || "Zdjęcie w artykule"}
+              className="max-h-[550px] w-auto object-contain mx-auto"
+            />
+          </div>
+          {caption && (
+            <figcaption className="text-xs text-muted-foreground mt-3 text-center italic max-w-md">
+              {caption}
+            </figcaption>
+          )}
+        </figure>
+      );
+    }
     case "gallery":
       return <GalleryBlock key={block.id} urls={block.data.urls} />;
     default:

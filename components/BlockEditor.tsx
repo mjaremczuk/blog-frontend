@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from "react";
 import EditorJS, { OutputData } from "@editorjs/editorjs";
 import Header from "@editorjs/header";
 import List from "@editorjs/list";
+import ImageTool from "@editorjs/image";
 import { GalleryTool } from "@/lib/editor/GalleryTool";
 
 interface BlockEditorProps {
@@ -32,7 +33,7 @@ export default function BlockEditor({ value, onChange, disabled = false }: Block
     const editor = new EditorJS({
       holder: containerId,
       readOnly: disabled,
-      placeholder: "Zacznij pisać tutaj... Naciśnij Tab lub kliknij '+', by dodać bloki (Nagłówek, Lista, Galeria).",
+      placeholder: "Zacznij pisać tutaj... Naciśnij Tab lub kliknij '+', by dodać bloki (Nagłówek, Lista, Galeria, Obraz).",
       data: initialData,
       tools: {
         header: {
@@ -49,6 +50,15 @@ export default function BlockEditor({ value, onChange, disabled = false }: Block
           inlineToolbar: true,
           config: {
             defaultStyle: "unordered"
+          }
+        },
+        image: {
+          class: ImageTool as any,
+          config: {
+            endpoints: {
+              byFile: "http://localhost:8080/api/upload", // Ktor backend upload endpoint
+            },
+            field: "image", // Name of the multipart field (Ktor receives this under 'image')
           }
         },
         gallery: {
