@@ -5,7 +5,7 @@ import EditorJS, { OutputData } from "@editorjs/editorjs";
 import Header from "@editorjs/header";
 import List from "@editorjs/list";
 import ImageTool from "@editorjs/image";
-import { GalleryTool } from "@/lib/editor/GalleryTool";
+import { GalleryBlockTool } from "@/components/GalleryBlockTool";
 
 interface BlockEditorProps {
   value: string; // JSON string representing Editor.js output
@@ -62,7 +62,7 @@ export default function BlockEditor({ value, onChange, disabled = false }: Block
           }
         },
         gallery: {
-          class: GalleryTool as any,
+          class: GalleryBlockTool as any,
         },
       },
       onChange: async () => {
