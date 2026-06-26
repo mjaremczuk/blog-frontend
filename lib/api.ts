@@ -38,6 +38,15 @@ function setTokenCookie(token: string, days = 7) {
   document.cookie = `token=${encodeURIComponent(token)};expires=${expires.toUTCString()};path=/;SameSite=Strict;Secure`;
 }
 
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+    this.name = "ApiError";
+  }
+}
+
 // Helper to handle Ktor error responses gracefully
 async function handleResponseError(response: Response): Promise<never> {
   let errorMessage = `Błąd serwera (kod: ${response.status})`;
@@ -55,7 +64,7 @@ async function handleResponseError(response: Response): Promise<never> {
       if (text) errorMessage = text;
     } catch {}
   }
-  throw new Error(errorMessage);
+  throw new ApiError(errorMessage, response.status);
 }
 
 /**
@@ -146,6 +155,12 @@ export async function getAllPosts(token?: string): Promise<PostDto[]> {
 
     return await res.json();
   } catch (error) {
+    // Jeśli token autoryzacyjny był niepoprawny/wygasły (401), ponawiamy zapytanie bez tokenu,
+    // aby użytkownik mógł chociaż zobaczyć publiczne artykuły bez błędu serwera.
+    if (token && error instanceof ApiError && error.status === 401) {
+      console.warn("Invalid token (401) when fetching all posts, retrying without authorization...");
+      return getAllPosts();
+    }
     if (error instanceof Error) {
       throw error;
     }
@@ -182,6 +197,12 @@ export async function getPostBySlug(slug: string, token?: string): Promise<PostD
 
     return await res.json();
   } catch (error) {
+    // Jeśli token autoryzacyjny był niepoprawny/wygasły (401), ponawiamy zapytanie bez tokenu,
+    // aby użytkownik mógł chociaż zobaczyć publiczny artykuł.
+    if (token && error instanceof ApiError && error.status === 401) {
+      console.warn(`Invalid token (401) when fetching post ${slug}, retrying without authorization...`);
+      return getPostBySlug(slug);
+    }
     if (error instanceof Error) {
       throw error;
     }
