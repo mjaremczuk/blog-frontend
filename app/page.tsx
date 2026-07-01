@@ -72,11 +72,12 @@ export default async function Home() {
       {/* Hero Section */}
       <section className="space-y-4">
         <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-          Witaj na moim <span className="text-accent">Blogu Osobistym</span>
+          Witaj w moim <span className="text-accent">miejscu w sieci</span>
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
-          Piszę o nowoczesnym web developmencie, frontendzie w Next.js, backendzie w Ktorze 
-          oraz architekturze oprogramowania. Czyste podejście do kodu i projektowania.
+          Piszę o wszystkim, co mnie pasjonuje. Znajdziesz tu przemyślenia z codziennego życia, 
+          tematy zawodowe i programistyczne, a także moje sportowe zmagania – od biegania, 
+          pływania i roweru, po wyzwania triathlonowe.
         </p>
         <div className="flex gap-3 pt-2">
           {token ? (
@@ -88,7 +89,9 @@ export default async function Home() {
               <Button variant="primary">Zaloguj się do panelu</Button>
             </Link>
           )}
-          <Button variant="outline">O mnie</Button>
+          <Link href="/about">
+            <Button variant="outline">O mnie</Button>
+          </Link>
         </div>
       </section>
 
@@ -106,9 +109,9 @@ export default async function Home() {
 
         {errorMsg ? (
           <div className="rounded-2xl border border-amber-900/50 bg-amber-950/20 p-8 text-center">
-            <h3 className="text-lg font-semibold text-amber-500 mb-2">Brak połączenia z backendem Ktor</h3>
+            <h3 className="text-lg font-semibold text-amber-500 mb-2">Brak połączenia z serwerem</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Upewnij się, że serwer backendowy Ktor działa pod adresem{" "}
+              Upewnij się, że serwer działa pod adresem{" "}
               <code className="bg-neutral-900 px-1.5 py-0.5 rounded text-neutral-300 font-mono text-xs">
                 {API_BASE_URL}
               </code>

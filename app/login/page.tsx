@@ -95,17 +95,12 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="password"
-                className="text-xs font-semibold text-neutral-300 uppercase tracking-wider"
-              >
-                Hasło
-              </label>
-              <a href="#" className="text-xs text-accent hover:underline">
-                Zapomniałeś hasła?
-              </a>
-            </div>
+            <label
+              htmlFor="password"
+              className="text-xs font-semibold text-neutral-300 uppercase tracking-wider block"
+            >
+              Hasło
+            </label>
             <input
               id="password"
               type="password"
@@ -126,13 +121,6 @@ export default function LoginPage() {
             {isLoading ? "Logowanie..." : "Zaloguj się"}
           </Button>
         </form>
-
-        <div className="mt-6 text-center text-sm text-muted-foreground">
-          Nie masz jeszcze konta?{" "}
-          <Link href="/register" className="font-medium text-accent hover:underline">
-            Zarejestruj się
-          </Link>
-        </div>
       </div>
 
       <Link
