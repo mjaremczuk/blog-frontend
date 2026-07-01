@@ -81,17 +81,19 @@ export default async function Home() {
         </p>
         <div className="flex gap-3 pt-2">
           {token ? (
-            <Link href="/admin">
-              <Button variant="primary">Stwórz nowy wpis</Button>
-            </Link>
+            <>
+              <Link href="/admin">
+                <Button variant="primary">Stwórz nowy wpis</Button>
+              </Link>
+              <Link href="/about">
+                <Button variant="outline">O mnie</Button>
+              </Link>
+            </>
           ) : (
-            <Link href="/login">
-              <Button variant="primary">Zaloguj się do panelu</Button>
+            <Link href="/about">
+              <Button variant="primary">O mnie</Button>
             </Link>
           )}
-          <Link href="/about">
-            <Button variant="outline">O mnie</Button>
-          </Link>
         </div>
       </section>
 
