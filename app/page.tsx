@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { getAllPosts, PostDto, API_BASE_URL } from "@/lib/api";
 import { Button } from "@/components/Button";
+import ChatWidget from "@/components/ChatWidget";
 
 // Set page as dynamic since it reads cookies at request time
 export const dynamic = "force-dynamic";
@@ -210,6 +211,9 @@ export default async function Home() {
           </div>
         )}
       </section>
+
+      {/* Globalny Chat Widget Asystenta AI */}
+      <ChatWidget />
     </div>
   );
 }

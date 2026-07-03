@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getPostBySlug } from "@/lib/api";
 import { Button } from "@/components/Button";
 import GalleryBlock from "@/components/GalleryBlock";
+import ChatWidget from "@/components/ChatWidget";
 
 // Ensure page is evaluated dynamically since it reads cookies at request time
 export const dynamic = "force-dynamic";
@@ -248,6 +249,9 @@ export default async function PostPage({ params }: PostPageProps) {
       <div className="prose prose-invert max-w-none">
         {parsedContent}
       </div>
+
+      {/* Chat Widget Asystenta AI */}
+      <ChatWidget postSlug={slug} postTitle={post.title} />
     </article>
   );
 }

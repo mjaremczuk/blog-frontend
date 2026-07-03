@@ -158,7 +158,6 @@ export async function getAllPosts(token?: string): Promise<PostDto[]> {
     // Jeśli token autoryzacyjny był niepoprawny/wygasły (401), ponawiamy zapytanie bez tokenu,
     // aby użytkownik mógł chociaż zobaczyć publiczne artykuły bez błędu serwera.
     if (token && error instanceof ApiError && error.status === 401) {
-      console.warn("Invalid token (401) when fetching all posts, retrying without authorization...");
       return getAllPosts();
     }
     if (error instanceof Error) {
@@ -200,7 +199,6 @@ export async function getPostBySlug(slug: string, token?: string): Promise<PostD
     // Jeśli token autoryzacyjny był niepoprawny/wygasły (401), ponawiamy zapytanie bez tokenu,
     // aby użytkownik mógł chociaż zobaczyć publiczny artykuł.
     if (token && error instanceof ApiError && error.status === 401) {
-      console.warn(`Invalid token (401) when fetching post ${slug}, retrying without authorization...`);
       return getPostBySlug(slug);
     }
     if (error instanceof Error) {
