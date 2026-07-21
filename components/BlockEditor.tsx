@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import EditorJS, { OutputData } from "@editorjs/editorjs";
 import Header from "@editorjs/header";
 import List from "@editorjs/list";
@@ -14,13 +14,45 @@ interface BlockEditorProps {
   disabled?: boolean;
 }
 
-export default function BlockEditor({ value, onChange, disabled = false }: BlockEditorProps) {
-  const editorRef = useRef<EditorJS | null>(null);
-  const containerId = "editorjs-container";
+export interface BlockEditorHandler {
+  renderBlocks: (data: OutputData) => Promise<void>;
+  clear: () => Promise<void>;
+}
 
+const BlockEditor = forwardRef<BlockEditorHandler, BlockEditorProps>(function BlockEditor(
+  { value, onChange, disabled = false },
+  ref
+) {
+  const editorInstanceRef = useRef<EditorJS | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Expose clean imperative methods for direct block rendering and clearing
+  useImperativeHandle(ref, () => ({
+    renderBlocks: async (data: OutputData) => {
+      if (editorInstanceRef.current) {
+        try {
+          await editorInstanceRef.current.isReady;
+          await editorInstanceRef.current.render(data);
+        } catch (e) {
+          console.error("Failed to render blocks in Editor.js:", e);
+        }
+      }
+    },
+    clear: async () => {
+      if (editorInstanceRef.current) {
+        try {
+          await editorInstanceRef.current.isReady;
+          await editorInstanceRef.current.blocks.clear();
+        } catch (e) {
+          console.error("Failed to clear Editor.js blocks:", e);
+        }
+      }
+    },
+  }));
+
+  // Initialize Editor.js ONCE on mount (without destroy calls that wipe DOM nodes)
   useEffect(() => {
-    // Avoid double initialization
-    if (editorRef.current) return;
+    if (editorInstanceRef.current || !containerRef.current) return;
 
     let initialData: OutputData | undefined;
     try {
@@ -31,14 +63,19 @@ export default function BlockEditor({ value, onChange, disabled = false }: Block
       console.warn("Failed to parse initial Editor.js data", e);
     }
 
-    const editor = new EditorJS({
-      holder: containerId,
+    const EditorJSClass = (EditorJS as any).default || EditorJS;
+    const HeaderTool = (Header as any).default || Header;
+    const ListTool = (List as any).default || List;
+    const ImagePlugin = (ImageTool as any).default || ImageTool;
+
+    const instance = new EditorJSClass({
+      holder: containerRef.current,
       readOnly: disabled,
       placeholder: "Zacznij pisać tutaj... Naciśnij Tab lub kliknij '+', by dodać bloki (Nagłówek, Lista, Galeria, Obraz).",
       data: initialData,
       tools: {
         header: {
-          class: Header as any,
+          class: HeaderTool as any,
           inlineToolbar: true,
           config: {
             placeholder: "Nagłówek",
@@ -47,14 +84,14 @@ export default function BlockEditor({ value, onChange, disabled = false }: Block
           },
         },
         list: {
-          class: List as any,
+          class: ListTool as any,
           inlineToolbar: true,
           config: {
             defaultStyle: "unordered"
           }
         },
         image: {
-          class: ImageTool as any,
+          class: ImagePlugin as any,
           config: {
             endpoints: {
               byFile: `${API_BASE_URL}/api/upload`, // Ktor backend upload endpoint
@@ -68,7 +105,8 @@ export default function BlockEditor({ value, onChange, disabled = false }: Block
       },
       onChange: async () => {
         try {
-          const savedData = await editor.save();
+          await instance.isReady;
+          const savedData = await instance.save();
           onChange(JSON.stringify(savedData));
         } catch (e) {
           console.error("Error saving EditorJS data:", e);
@@ -76,41 +114,25 @@ export default function BlockEditor({ value, onChange, disabled = false }: Block
       },
     });
 
-    editorRef.current = editor;
+    editorInstanceRef.current = instance;
+  }, []); // Run ONLY ONCE on mount
 
-    return () => {
-      if (editorRef.current) {
-        // Destroy instance safely
-        if (typeof editorRef.current.destroy === "function") {
-          editorRef.current.destroy();
-        }
-        editorRef.current = null;
-      }
-    };
-  }, [disabled]);
-
-  // Handle external value changes (e.g. form reset)
+  // Safely toggle readOnly mode without destroying the editor instance
   useEffect(() => {
-    if (!editorRef.current) return;
-
-    const updateEditor = async () => {
-      try {
-        await editorRef.current?.isReady;
-        if (!value && typeof editorRef.current?.blocks?.clear === "function") {
-          await editorRef.current.blocks.clear();
-        }
-      } catch (e) {
-        // Suppress or log warning instead of throwing unhandled exception
-        console.warn("Editor.js was not fully ready or blocks.clear is unavailable:", e);
-      }
-    };
-    
-    updateEditor();
-  }, [value]);
+    if (editorInstanceRef.current && typeof editorInstanceRef.current.readOnly?.toggle === "function") {
+      editorInstanceRef.current.isReady
+        .then(() => {
+          editorInstanceRef.current?.readOnly?.toggle(disabled);
+        })
+        .catch(() => {});
+    }
+  }, [disabled]);
 
   return (
     <div className="w-full rounded-lg border border-border bg-card p-4 text-foreground focus-within:border-neutral-700 transition-colors">
-      <div id={containerId} className="editorjs-w-full min-h-[350px]" />
+      <div ref={containerRef} className="editorjs-w-full min-h-[350px]" />
     </div>
   );
-}
+});
+
+export default BlockEditor;
