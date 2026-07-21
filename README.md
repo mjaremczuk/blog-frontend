@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Blog Frontend - Next.js 16 Web Application
 
-## Getting Started
+The frontend client application for the blog system, built with **Next.js 16 (App Router)** following **Clean Architecture & SOLID** principles. Features an interactive Editor.js block editor, post creation via OCR note ingestion, post editing/deletion management, private posts support, and toast notifications.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Live Production URL
+
+The application is deployed and live at:
+👉 **[https://blog-frontend-jade-seven.vercel.app/](https://blog-frontend-jade-seven.vercel.app/)**
+
+---
+
+## Environment Variables
+
+Configure the following variables in `.env.local` (for local development) and in the Vercel Dashboard (for production deployment):
+
+```env
+NEXT_PUBLIC_API_URL=https://blog-backend-hwz2crveta-ew.a.run.app
+NEXT_PUBLIC_OCR_API_URL=https://blog-ocr-agent-hwz2crveta-ew.a.run.app
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Local Development Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Navigate to the project directory:
+   ```bash
+   cd blog-frontend
+   ```
 
-## Learn More
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. Start the local development server:
+   ```bash
+   npm run dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open [http://localhost:3000](http://localhost:3000) in your browser to access the web application.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Production Deployment on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The application is connected to the **Vercel** platform. There are two primary deployment workflows:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Method 1: Automatic Deployment via Git (Recommended)
+Vercel is linked directly to the `main` branch of the GitHub repository. Any `git push` or merged Pull Request to the `main` branch automatically triggers a new production build and deployment.
+
+### Method 2: Manual Deployment via Vercel CLI
+
+To manually trigger a deployment directly from your command line:
+
+1. Authenticate with Vercel CLI (one-time setup):
+   ```bash
+   npx vercel login
+   ```
+
+2. Deploy the project to production:
+   ```bash
+   npx vercel --prod
+   ```
+
+Vercel will compile the application (`npm run build`) and update the live deployment at `https://blog-frontend-jade-seven.vercel.app/`.
+
+---
+
+## Backend CORS Configuration
+
+After deploying to Vercel, ensure that your production frontend domain (`blog-frontend-jade-seven.vercel.app`) is included in the `CORS_ALLOWED_HOSTS` environment variable of the Cloud Run backend (`blog-backend`).

@@ -134,7 +134,7 @@ export default async function Home() {
               // Get clean user-friendly excerpt
               const excerpt = getPostExcerpt(post.content);
 
-              // Format date (simplified layout since we display in PL)
+              // Format date
               const formattedDate = post.createdAt
                 ? new Date(post.createdAt).toLocaleDateString("pl-PL", {
                     day: "numeric",
@@ -212,7 +212,7 @@ export default async function Home() {
         )}
       </section>
 
-      {/* Globalny Chat Widget Asystenta AI */}
+      {/* Global AI Assistant Chat Widget */}
       <ChatWidget />
     </div>
   );

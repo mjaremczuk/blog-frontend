@@ -13,6 +13,10 @@ export class GalleryBlockTool implements BlockTool {
   private isUploading: boolean = false;
   private uploadProgress: string = "";
 
+  static get isReadOnlySupported(): boolean {
+    return true;
+  }
+
   static get toolbox() {
     return {
       title: "Galeria zdjęć",

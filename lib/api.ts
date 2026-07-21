@@ -240,3 +240,71 @@ export async function createPost(postData: CreatePostRequest, token: string): Pr
     throw new Error("Nie udało się utworzyć nowego artykułu.");
   }
 }
+
+/**
+ * Aktualizuje istniejący artykuł na podstawie identyfikatora (wymaga autoryzacji).
+ * @param id Identyfikator lub slug artykułu
+ * @param postData Zaktualizowane dane artykułu
+ * @param token Token JWT administratora
+ */
+export async function updatePost(
+  id: string,
+  postData: CreatePostRequest,
+  token: string
+): Promise<PostDto> {
+  if (!token) {
+    throw new Error("Brak tokenu autoryzacyjnego. Zaloguj się ponownie.");
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/posts/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(postData),
+    });
+
+    if (!res.ok) {
+      await handleResponseError(res);
+    }
+
+    return await res.json();
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Nie udało się zaktualizować artykułu.");
+  }
+}
+
+/**
+ * Usuwa artykuł na podstawie identyfikatora (wymaga autoryzacji).
+ * @param id Identyfikator artykułu
+ * @param token Token JWT administratora
+ */
+export async function deletePost(id: string, token: string): Promise<void> {
+  if (!token) {
+    throw new Error("Brak tokenu autoryzacyjnego. Zaloguj się ponownie.");
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/posts/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      await handleResponseError(res);
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Nie udało się usunąć artykułu.");
+  }
+}
+

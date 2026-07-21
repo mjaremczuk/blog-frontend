@@ -250,7 +250,7 @@ export default async function PostPage({ params }: PostPageProps) {
         {parsedContent}
       </div>
 
-      {/* Chat Widget Asystenta AI */}
+      {/* Global AI Assistant Chat Widget */}
       <ChatWidget postSlug={slug} postTitle={post.title} />
     </article>
   );
